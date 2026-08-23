@@ -9,12 +9,12 @@ Aplicativo desktop para rotear o Discord por um proxy nos Estados Unidos, ajudan
 
 ## Download Direto (.exe)
 
-Baixe a versao pronta na aba [Releases](https://github.com/DenkerBR/Discord-Proxy/releases). O executavel nao exige Python instalado.
+Baixe a versao pronta na aba [Releases](https://github.com/Kevin7Denker/Discord-Proxy/releases). O executavel nao exige Python instalado.
 
 ## Instalar Pelo Codigo-Fonte
 
 ```powershell
-git clone https://github.com/DenkerBR/Discord-Proxy.git
+git clone https://github.com/Kevin7Denker/Discord-Proxy.git
 cd Discord-Proxy
 python -m venv .venv
 .venv\Scripts\Activate.ps1
