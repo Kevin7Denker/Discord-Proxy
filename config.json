@@ -1,8 +1,8 @@
 {
-  "host": "altaria.proxy.rlwy.net",
-  "port": 30699,
+  "host": "",
+  "port": 1080,
   "proxy_type": "SOCKS5",
-  "username": "LazyPirates",
-  "password": "Lazy@2612",
-  "discord_path": "C:\\Users\\kevin\\AppData\\Local\\Discord\\app-1.0.9254\\Discord.exe"
+  "username": "",
+  "password": "",
+  "discord_path": ""
 }

@@ -10,6 +10,7 @@ from typing import Dict, Tuple
 from .proxy import ProxyEndpoint
 
 CONFIG_FILE_NAME = "config.json"
+APP_DATA_DIR_NAME = "Discord Proxy"
 DEFAULT_PORTS: Dict[str, int] = {"SOCKS5": 1080, "HTTP": 8080}
 
 
@@ -62,8 +63,15 @@ class AppConfig:
 
 class ConfigManager:
     def __init__(self, config_path: str | None = None):
-        self.config_path = Path(config_path) if config_path else Path(__file__).resolve().parent.parent / CONFIG_FILE_NAME
+        self.config_path = Path(config_path) if config_path else self.default_config_path()
         self.config = self.load_config()
+
+    @staticmethod
+    def default_config_path() -> Path:
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if local_app_data:
+            return Path(local_app_data) / APP_DATA_DIR_NAME / CONFIG_FILE_NAME
+        return Path.home() / "AppData" / "Local" / APP_DATA_DIR_NAME / CONFIG_FILE_NAME
 
     def load_config(self) -> AppConfig:
         if not self.config_path.exists():
@@ -94,6 +102,7 @@ class ConfigManager:
     def save_config(self, config: AppConfig | None = None) -> None:
         if config is not None:
             self.config = config
+        self.config_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.config_path, "w", encoding="utf-8") as file:
             json.dump(asdict(self.config), file, indent=2)
 

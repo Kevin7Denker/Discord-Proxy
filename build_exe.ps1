@@ -1,8 +1,8 @@
 Param(
-    [string]$AppName = "DiscordProxyRouter",
+    [string]$AppName = "DiscordProxy",
     [string]$MainFile = "main.py",
     [string]$VersionFile = "version_info.txt",
-    [string]$IconFile = "assets/app.ico"
+    [string]$IconFile = "assets/icon.ico"
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,6 +28,9 @@ $args = @(
     "--clean",
     "--name", $AppName,
     "--version-file", $VersionFile,
+    "--add-data", "assets;assets",
+    "--add-data", "core;core",
+    "--add-data", "ui;ui",
     $MainFile
 )
 

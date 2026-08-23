@@ -16,12 +16,12 @@ VSVersionInfo(
       StringTable(
         '040904B0',
         [StringStruct('CompanyName', 'Discord Proxy Tools'),
-        StringStruct('FileDescription', 'Discord Proxy Router Desktop'),
+        StringStruct('FileDescription', 'Discord Proxy Desktop Application'),
         StringStruct('FileVersion', '1.0.0.0'),
-        StringStruct('InternalName', 'DiscordProxyRouter'),
-        StringStruct('LegalCopyright', 'Copyright (c) 2026'),
-        StringStruct('OriginalFilename', 'DiscordProxyRouter.exe'),
-        StringStruct('ProductName', 'Discord Proxy Router'),
+        StringStruct('InternalName', 'DiscordProxy'),
+        StringStruct('LegalCopyright', 'Copyright (c) 2026 Discord Proxy Tools'),
+        StringStruct('OriginalFilename', 'DiscordProxy.exe'),
+        StringStruct('ProductName', 'Discord Proxy'),
         StringStruct('ProductVersion', '1.0.0.0')])
       ]),
     VarFileInfo([VarStruct('Translation', [1033, 1200])])
