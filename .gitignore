@@ -3,7 +3,9 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 build/
-dist/
+dist/*
+!dist/DISCORD PROXY.exe
+
 *.spec
 config.local.json
 *.log

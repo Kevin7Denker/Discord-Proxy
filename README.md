@@ -40,7 +40,7 @@ Instale as dependencias e execute:
 python build.py
 ```
 
-O arquivo `dist/DiscordProxie.exe` sera gerado em modo standalone, sem console. Mantenha `assets/icon.ico` no repositorio para usar o icone personalizado.
+O arquivo `dist/DISCORD PROXY.exe` sera gerado em modo standalone, sem console. Mantenha `assets/icon.ico` no repositorio para usar o icone personalizado.
 
 ## Estrutura
 
