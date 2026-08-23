@@ -14,7 +14,7 @@ Baixe a versao pronta na aba [Releases](https://github.com/Kevin7Denker/Discord-
 ## Instalar Pelo Codigo-Fonte
 
 ```powershell
-git clone https://github.com/DenkerBR/Discord-Proxy.git
+git clone https://github.com/Kevin7Denker/Discord-Proxy.git
 cd Discord-Proxy
 python -m venv .venv
 .venv\Scripts\Activate.ps1
