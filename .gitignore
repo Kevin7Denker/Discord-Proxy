@@ -14,3 +14,4 @@ config.local.json
 .claude
 .codex
 /Skills
+.env
