@@ -59,13 +59,14 @@ if ($iscc) {
     Write-Host "`n[6/6] Verifying signatures..."
     .\scripts\signing\verify-signature.ps1 $exePath $setupPath
 } else {
-    Write-Warning "`n[4/6] Inno Setup (ISCC.exe) not found. Skipping installer generation."
+    Write-Warning "`n[4/6] Inno Setup (ISCC.exe) not found. Building installer with IExpress fallback..."
+    & $pythonExe scripts/build_setup.py
+    if ($LASTEXITCODE -ne 0) { Write-Error "IExpress installer build failed."; exit 1 }
+    Write-Host "Installer built successfully."
     
     # 6. Verify Executable Only
     Write-Host "`n[6/6] Verifying signature..."
     .\scripts\signing\verify-signature.ps1 $exePath
-    
-    $setupPath = "(Setup not generated)"
 }
 
 Write-Host "`n======================================"

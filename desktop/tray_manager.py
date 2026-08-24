@@ -3,6 +3,8 @@ from threading import Thread
 import pystray
 from PIL import Image, ImageDraw
 
+from core.paths import get_assets_path
+
 class TrayManager:
     def __init__(self, app):
         self.app = app
@@ -31,6 +33,11 @@ class TrayManager:
         return f"Discord Proxie - {status_text}"
 
     def _generate_icon(self, active: bool) -> Image.Image:
+        asset_name = "tray-active.png" if active else "tray-idle.png"
+        asset_path = get_assets_path() / asset_name
+        if asset_path.is_file():
+            return Image.open(asset_path).convert("RGBA")
+
         bg_color = (40, 42, 54, 255)
         outline_color = (80, 250, 123, 255) if active else (255, 85, 85, 255)
         bar_color = (80, 250, 123, 255) if active else (98, 114, 164, 255)
