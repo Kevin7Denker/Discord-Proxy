@@ -1,20 +1,17 @@
-from __future__ import annotations
-
-from dataclasses import asdict, dataclass, fields
-import glob
 import json
 import os
-from pathlib import Path
+from dataclasses import asdict, dataclass
 from typing import Dict, Tuple
 
-from .proxy import ProxyEndpoint
+from dotenv import load_dotenv
+from core.paths import get_env_path, get_base_path
+from core.network_service import ProxyEndpoint
 
-CONFIG_FILE_NAME = "config.json"
 DEFAULT_PORTS: Dict[str, int] = {"SOCKS5": 1080, "HTTP": 8080}
-
 
 def find_discord_executable() -> str:
     local_app_data = os.environ.get("LOCALAPPDATA", "")
+    import glob
     variants = [("Discord", "Discord.exe"), ("DiscordCanary", "DiscordCanary.exe"), ("DiscordPTB", "DiscordPTB.exe")]
     for folder_name, exe_name in variants:
         pattern = os.path.join(local_app_data, folder_name, "app-*", exe_name)
@@ -22,7 +19,6 @@ def find_discord_executable() -> str:
         if matches:
             return sorted(matches)[-1]
     return ""
-
 
 def sanitize_host_port(host_text: str, port_text: str, proxy_type: str = "SOCKS5") -> Tuple[str, int]:
     host = (host_text or "").strip()
@@ -34,18 +30,17 @@ def sanitize_host_port(host_text: str, port_text: str, proxy_type: str = "SOCKS5
             if not port_candidate:
                 port_candidate = maybe_port
     if not host:
-        raise ValueError("Proxy host is required.")
+        host = "127.0.0.1"
     if not port_candidate:
         port = DEFAULT_PORTS.get((proxy_type or "SOCKS5").upper(), 1080)
     else:
         try:
             port = int(port_candidate)
-        except ValueError as exc:
-            raise ValueError("Proxy port must be a valid number.") from exc
+        except ValueError:
+            port = DEFAULT_PORTS.get((proxy_type or "SOCKS5").upper(), 1080)
     if port < 1 or port > 65535:
-        raise ValueError("Proxy port must be between 1 and 65535.")
+        port = DEFAULT_PORTS.get((proxy_type or "SOCKS5").upper(), 1080)
     return host, port
-
 
 @dataclass
 class AppConfig:
@@ -55,53 +50,74 @@ class AppConfig:
     username: str = ""
     password: str = ""
     discord_path: str = ""
+    language: str = "en-US"
+    theme: str = "dark"
 
     def to_proxy_endpoint(self) -> ProxyEndpoint:
-        return ProxyEndpoint(self.host, self.port, self.proxy_type.lower(), self.username, self.password)
-
+        return ProxyEndpoint(
+            host=self.host,
+            port=self.port,
+            proxy_type=self.proxy_type,
+            username=self.username,
+            password=self.password
+        )
 
 class ConfigManager:
-    def __init__(self, config_path: str | None = None):
-        self.config_path = Path(config_path) if config_path else Path(__file__).resolve().parent.parent / CONFIG_FILE_NAME
+    def __init__(self):
+        self.env_path = get_env_path()
+        self.prefs_path = get_base_path() / "prefs.json"
+        load_dotenv(self.env_path, override=True)
         self.config = self.load_config()
 
     def load_config(self) -> AppConfig:
-        if not self.config_path.exists():
-            config = AppConfig(discord_path=find_discord_executable())
-            self.save_config(config)
-            return config
-        try:
-            with open(self.config_path, "r", encoding="utf-8") as file:
-                raw = json.load(file)
-        except Exception:
-            config = AppConfig(discord_path=find_discord_executable())
-            self.save_config(config)
-            return config
+        raw_prefs = {}
+        if self.prefs_path.exists():
+            try:
+                with open(self.prefs_path, "r", encoding="utf-8") as file:
+                    raw_prefs = json.load(file)
+            except Exception:
+                pass
+
         defaults = asdict(AppConfig())
-        allowed = {field.name for field in fields(AppConfig)}
-        merged = {**defaults, **{key: value for key, value in raw.items() if key in allowed}}
+        allowed_ui_prefs = {"language", "theme"}
+        merged = {**defaults, **{k: v for k, v in raw_prefs.items() if k in allowed_ui_prefs}}
+
+        env_values = {
+            "host": os.environ.get("PROXY_HOST", ""),
+            "port": os.environ.get("PROXY_PORT", ""),
+            "proxy_type": os.environ.get("PROXY_TYPE", "SOCKS5"),
+            "username": os.environ.get("PROXY_USER", ""),
+            "password": os.environ.get("PROXY_PASS", ""),
+            "discord_path": os.environ.get("DISCORD_PATH", ""),
+        }
+        
+        for k, v in env_values.items():
+            if v:
+                merged[k] = v
+
         merged["proxy_type"] = str(merged.get("proxy_type", "SOCKS5")).upper()
         if merged["proxy_type"] not in DEFAULT_PORTS:
             merged["proxy_type"] = "SOCKS5"
-        try:
-            merged["port"] = int(merged.get("port") or DEFAULT_PORTS[merged["proxy_type"]])
-        except Exception:
-            merged["port"] = DEFAULT_PORTS[merged["proxy_type"]]
+            
+        merged["host"], merged["port"] = sanitize_host_port(merged.get("host", ""), str(merged.get("port", "")), merged["proxy_type"])
+        
         path = str(merged.get("discord_path") or "")
         merged["discord_path"] = path if os.path.isfile(path) else find_discord_executable()
+
         return AppConfig(**merged)
 
-    def save_config(self, config: AppConfig | None = None) -> None:
-        if config is not None:
-            self.config = config
-        with open(self.config_path, "w", encoding="utf-8") as file:
-            json.dump(asdict(self.config), file, indent=2)
+    def save_ui_prefs(self) -> None:
+        prefs = {
+            "language": self.config.language,
+            "theme": self.config.theme
+        }
+        try:
+            with open(self.prefs_path, "w", encoding="utf-8") as file:
+                json.dump(prefs, file, indent=2)
+        except Exception:
+            pass
 
-    def update_from_dict(self, updates: dict) -> None:
-        for key, value in updates.items():
-            if hasattr(self.config, key):
-                setattr(self.config, key, value)
-        self.config.proxy_type = (self.config.proxy_type or "SOCKS5").upper()
-        if self.config.proxy_type not in DEFAULT_PORTS:
-            self.config.proxy_type = "SOCKS5"
-        self.save_config()
+    def update_pref(self, key: str, value: str) -> None:
+        if hasattr(self.config, key):
+            setattr(self.config, key, value)
+            self.save_ui_prefs()

@@ -9,3 +9,8 @@ dist/*
 *.spec
 config.local.json
 *.log
+
+.impeccable
+.claude
+.codex
+/Skills

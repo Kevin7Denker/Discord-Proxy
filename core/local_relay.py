@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 
 from python_socks.async_.asyncio import Proxy
 
-from .proxy import ProxyEndpoint, build_proxy_url
+from .network_service import ProxyEndpoint, build_proxy_url
 
 
 @dataclass

@@ -1,0 +1,13 @@
+{
+  "status_disconnected": "Disconnected",
+  "status_waiting": "Waiting for secure connection",
+  "status_connected": "Connected",
+  "status_connected_geo": "Connected to {city}, {country}",
+  "status_validating": "Validating route...",
+  "btn_connect": "Connect & Start",
+  "btn_disconnect": "Disconnect",
+  "lbl_uptime": "Uptime",
+  "tray_open": "Open Dashboard",
+  "tray_disconnect": "Disconnect Proxy",
+  "tray_exit": "Exit Application"
+}

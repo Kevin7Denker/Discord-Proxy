@@ -1,0 +1,81 @@
+from __future__ import annotations
+import asyncio
+import time
+from dataclasses import asdict
+
+from core.network_service import test_proxy_connectivity
+
+class ApiBridge:
+    def __init__(self, manager):
+        self._manager = manager
+
+    def start_discord(self) -> dict:
+        config = self._manager.config_manager.config
+        self._manager.logger.info(self._manager.i18n.t("status_validating"))
+        validation = asyncio.run(test_proxy_connectivity(config.to_proxy_endpoint()))
+        if not validation.get("ok"):
+            message = validation.get("error", "Unknown error")
+            self._manager.logger.error(f"Validation failed: {message}")
+            return {"ok": False, "message": message}
+            
+        self._manager.current_city = validation.get("city", "Unknown")
+        self._manager.current_country = validation.get("country", "Unknown")
+        
+        result = self._manager.launcher.start(config)
+        self._manager.logger.info(result.message)
+        self._manager.push_state()
+        return asdict(result)
+
+    def stop_discord(self) -> dict:
+        self._manager.logger.info("Stopping Discord and local relay...")
+        self._manager.launcher.stop()
+        self._manager.logger.info("Discord and relay stopped.")
+        self._manager.push_state()
+        return {"ok": True}
+        
+    def restart_discord(self) -> dict:
+        self._manager.logger.info("Restarting Discord and local relay...")
+        self._manager.launcher.stop()
+        time.sleep(1.0)
+        return self.start_discord()
+
+    def hide_window(self) -> None:
+        self._manager.window.hide()
+
+    def get_translations(self) -> dict:
+        return self._manager.i18n.get_all_translations()
+
+    def set_language(self, lang: str) -> None:
+        self._manager.i18n.set_language(lang)
+        self._manager.config_manager.update_pref("language", lang)
+        self._manager.tray.update_status(self._manager.launcher.is_active())
+
+    def set_theme(self, theme: str) -> None:
+        if theme in {"light", "dark"}:
+            self._manager.config_manager.update_pref("theme", theme)
+
+    def close_window(self) -> None:
+        if self._manager.launcher.is_active():
+            self._manager.window.hide()
+        else:
+            self._manager.cleanup()
+            self._manager.window.destroy()
+
+    def get_initial_state(self) -> dict:
+        return {
+            "active": self._manager.launcher.is_active(),
+            "lang": self._manager.i18n.current_lang,
+            "theme": self._manager.config_manager.config.theme
+        }
+
+    def force_exit(self) -> None:
+        self._manager.cleanup()
+        self._manager.window.destroy()
+
+    def open_support_link(self) -> None:
+        self._manager.logger.info("Opening support link...")
+        try:
+            import webbrowser
+            webbrowser.open("https://buymeacoffee.com/denker")
+        except Exception as e:
+            self._manager.logger.error(f"Failed to open link: {e}")

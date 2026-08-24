@@ -1,19 +1,19 @@
-from datetime import datetime
+import datetime
 from typing import Callable, Optional
-
 
 class Logger:
     def __init__(self):
-        self._callback: Optional[Callable[[str], None]] = None
+        self._ui_callback: Optional[Callable[[str], None]] = None
 
     def set_ui_callback(self, callback: Callable[[str], None]) -> None:
-        self._callback = callback
+        self._ui_callback = callback
 
     def _log(self, level: str, message: str) -> None:
-        line = f"[{datetime.now().strftime('%H:%M:%S')}] {level}: {message}"
-        print(line)
-        if self._callback:
-            self._callback(line)
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        formatted = f"[{timestamp}] {level}: {message}"
+        print(formatted)
+        if self._ui_callback:
+            self._ui_callback(formatted)
 
     def info(self, message: str) -> None:
         self._log("INFO", message)

@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 from urllib.parse import quote
 
 import httpx
+from core.paths import get_base_path
 
 
 @dataclass
@@ -62,7 +63,7 @@ class TunManager:
         return self._process is not None and self._process.poll() is None
 
     def find_binary(self) -> Optional[str]:
-        locations = [Path(__file__).resolve().parent.parent / self._BINARY_NAME, Path.cwd() / self._BINARY_NAME]
+        locations = [get_base_path() / self._BINARY_NAME, Path.cwd() / self._BINARY_NAME]
         for location in locations:
             if location.is_file():
                 return str(location)

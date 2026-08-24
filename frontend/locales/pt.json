@@ -1,0 +1,13 @@
+{
+  "status_disconnected": "Desconectado",
+  "status_waiting": "Aguardando conexão segura",
+  "status_connected": "Conectado",
+  "status_connected_geo": "Conectado a {city}, {country}",
+  "status_validating": "Validando rota...",
+  "btn_connect": "Conectar & Iniciar",
+  "btn_disconnect": "Desconectar",
+  "lbl_uptime": "Tempo Ativo",
+  "tray_open": "Abrir Dashboard",
+  "tray_disconnect": "Desconectar Proxy",
+  "tray_exit": "Encerrar Aplicação"
+}

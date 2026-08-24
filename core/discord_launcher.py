@@ -6,8 +6,8 @@ import subprocess
 from typing import List, Optional
 
 from .config import AppConfig
-from .proxy import TunManager
-from .relay import LocalRelayService, RelayConfig
+from .network_service import TunManager
+from .local_relay import LocalRelayService, RelayConfig
 
 BYPASS_LIST = "<-loopback>"
 DISCORD_PROCESS_NAMES = {"discord.exe", "update.exe", "discordcanary.exe", "discordptb.exe"}
@@ -56,6 +56,9 @@ class DiscordLauncher:
             self.relay.stop()
             self.relay = None
         self.process = None
+
+    def is_active(self) -> bool:
+        return self.process is not None and self.process.poll() is None
 
     def _build_launch_args(self, discord_path: str, proxy_scheme: str, proxy_host: str, proxy_port: int) -> List[str]:
         return [discord_path, f"--proxy-server={proxy_scheme}://{proxy_host}:{proxy_port}", f"--proxy-bypass-list={BYPASS_LIST}", "--force-webrtc-ip-handling-policy=disable_non_proxied_udp", "--enforce-webrtc-ip-permission-check", "--disable-features=WebRtcHideLocalIpsWithMdns", "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1"]

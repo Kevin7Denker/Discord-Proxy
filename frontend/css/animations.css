@@ -1,0 +1,61 @@
+.idle {
+  border: 2px solid var(--border);
+  box-shadow: none;
+}
+
+.idle svg {
+  color: var(--fg-muted);
+}
+
+.connected {
+  border: 2px solid var(--success);
+  box-shadow: 0 0 35px rgba(80, 250, 123, 0.3);
+  animation: breathing-glow 3s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+.connected svg {
+  color: var(--success);
+}
+
+@keyframes breathing-glow {
+  0% { box-shadow: 0 0 25px rgba(80, 250, 123, 0.2); transform: scale(1); }
+  100% { box-shadow: 0 0 50px rgba(80, 250, 123, 0.4); transform: scale(1.03); }
+}
+
+.connecting, .restarting {
+  border: 2px solid transparent;
+  animation: elastic-scale 1.5s infinite alternate cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.connecting svg, .restarting svg {
+  color: var(--accent);
+}
+
+.connecting .outer-ring, .restarting .outer-ring {
+  opacity: 1;
+  border: 2px solid;
+  border-image: linear-gradient(45deg, #8be9fd, #bd93f9) 1;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin 1.5s linear infinite;
+}
+
+.connecting .inner-ring, .restarting .inner-ring {
+  opacity: 1;
+  top: 10px; left: 10px; right: 10px; bottom: 10px;
+  border: 2px solid;
+  border-image: linear-gradient(-45deg, #bd93f9, #8be9fd) 1;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-reverse 2s linear infinite;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+@keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+@keyframes elastic-scale { 0% { transform: scale(0.97); } 100% { transform: scale(1.05); } }
+
+.spin-fast svg {
+  animation: spin 1s linear infinite;
+}

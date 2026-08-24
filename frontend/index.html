@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en-US" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discord Proxie</title>
+  <link rel="stylesheet" href="css/dracula.css">
+  <link rel="stylesheet" href="css/fluent.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="custom-titlebar titlebar-drag-region pywebview-drag-region">
+      <div class="brand">
+        <strong>Discord Proxie</strong> <span class="brand-sub">By Denker</span>
+      </div>
+      <div class="window-actions no-drag">
+        <select id="lang-select" class="lang-select" aria-label="Language">
+          <option value="en-US">EN</option>
+          <option value="pt-BR">PT</option>
+          <option value="es-ES">ES</option>
+        </select>
+        <button class="icon-button" id="theme-button" type="button" aria-label="Toggle Theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+        <button class="icon-button" id="minimize-button" type="button" aria-label="Minimize"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg></button>
+        <button class="icon-button close-button" id="close-button" type="button" aria-label="Close"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m7 7 10 10M17 7 7 17"/></svg></button>
+      </div>
+    </header>
+
+    <main class="hero-container">
+      <div class="hero-center">
+        <div class="status-shield idle" id="hero-shield">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div class="shield-ring outer-ring"></div>
+          <div class="shield-ring inner-ring"></div>
+        </div>
+        
+        <h1 class="status-text" id="status-text" data-i18n="status_disconnected">Disconnected</h1>
+        
+        <div class="timer-box hidden" id="timer-box">
+          <span class="timer-label" data-i18n="lbl_uptime">Uptime</span>
+          <span class="timer-value" id="session-timer">00:00:00</span>
+        </div>
+        
+        <div class="action-row">
+          <button id="main-action-button" class="btn-primary no-drag" type="button" data-i18n="btn_connect">Connect</button>
+          <button id="restart-button" class="icon-button btn-secondary hidden no-drag" type="button" aria-label="Restart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+    
+    <footer class="app-footer no-drag">
+      <button id="support-button" class="btn-ghost" type="button" aria-label="Support the project" title="Apoiar o projeto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        <span data-i18n="btn_support">Apoiar o projeto</span>
+      </button>
+    </footer>
+  </div>
+  <script type="module" src="js/app.js?v=2"></script>
+</body>
+</html>
