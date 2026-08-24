@@ -108,7 +108,8 @@ class WindowManager:
                 "lang": self.i18n.current_lang,
                 "theme": self.config_manager.config.theme,
                 "geo": self.current_city,
-                "country": self.current_country
+                "country": self.current_country,
+                "proxy_preferences": self.config_manager.get_proxy_preferences()
             }
             import json
             json_state = json.dumps(state)

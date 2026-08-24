@@ -8,6 +8,12 @@ dist/*
 
 *.spec
 config.local.json
+*.pfx
+*.p12
+*.key
+certificates/
+secrets/
+*.pem
 *.log
 
 .impeccable

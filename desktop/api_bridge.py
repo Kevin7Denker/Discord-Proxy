@@ -54,6 +54,28 @@ class ApiBridge:
         if theme in {"light", "dark"}:
             self._manager.config_manager.update_pref("theme", theme)
 
+    def set_custom_proxy(self, settings: dict) -> dict:
+        self._manager.config_manager.set_custom_proxy(settings)
+        self._manager.logger.info("Custom proxy settings saved.")
+        self._manager.push_state()
+        return {"ok": True, "proxy_preferences": self._manager.config_manager.get_proxy_preferences()}
+
+    def set_custom_proxy_enabled(self, enabled: bool) -> dict:
+        self._manager.config_manager.set_custom_proxy_enabled(enabled)
+        mode = "custom proxy" if self._manager.config_manager.config.custom_proxy_enabled else ".env proxy"
+        self._manager.logger.info(f"Proxy mode set to {mode}.")
+        self._manager.push_state()
+        return {"ok": True, "proxy_preferences": self._manager.config_manager.get_proxy_preferences()}
+
+    def reset_custom_proxy(self) -> dict:
+        self._manager.config_manager.reset_custom_proxy()
+        self._manager.logger.info("Custom proxy reset. Using .env proxy settings.")
+        self._manager.push_state()
+        return {"ok": True, "proxy_preferences": self._manager.config_manager.get_proxy_preferences()}
+
+    def get_recent_logs(self) -> list:
+        return list(self._manager.log_buffer)
+
     def close_window(self) -> None:
         if self._manager.launcher.is_active():
             self._manager.window.hide()
@@ -65,7 +87,9 @@ class ApiBridge:
         return {
             "active": self._manager.launcher.is_active(),
             "lang": self._manager.i18n.current_lang,
-            "theme": self._manager.config_manager.config.theme
+            "theme": self._manager.config_manager.config.theme,
+            "proxy_preferences": self._manager.config_manager.get_proxy_preferences(),
+            "logs": list(self._manager.log_buffer)
         }
 
     def force_exit(self) -> None:

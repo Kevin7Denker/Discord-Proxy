@@ -38,4 +38,20 @@ export class Api {
   static async openSupportLink() {
     return await window.pywebview.api.open_support_link();
   }
+
+  static async setCustomProxy(settings) {
+    return await window.pywebview.api.set_custom_proxy(settings);
+  }
+
+  static async setCustomProxyEnabled(enabled) {
+    return await window.pywebview.api.set_custom_proxy_enabled(enabled);
+  }
+
+  static async resetCustomProxy() {
+    return await window.pywebview.api.reset_custom_proxy();
+  }
+
+  static async getRecentLogs() {
+    return await window.pywebview.api.get_recent_logs();
+  }
 }

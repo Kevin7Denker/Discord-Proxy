@@ -16,21 +16,17 @@
         <strong>Discord Proxie</strong> <span class="brand-sub">By Denker</span>
       </div>
       <div class="window-actions no-drag">
-        <select id="lang-select" class="lang-select" aria-label="Language">
-          <option value="en-US">EN</option>
-          <option value="pt-BR">PT</option>
-          <option value="es-ES">ES</option>
-        </select>
-        <button class="icon-button" id="theme-button" type="button" aria-label="Toggle Theme">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <button class="icon-button" id="settings-button" type="button" aria-label="Settings" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
         <button class="icon-button" id="minimize-button" type="button" aria-label="Minimize"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg></button>
         <button class="icon-button close-button" id="close-button" type="button" aria-label="Close"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m7 7 10 10M17 7 7 17"/></svg></button>
       </div>
     </header>
 
-    <main class="hero-container">
-      <div class="hero-center">
+    <main class="screen-shell">
+      <section id="dashboard-view" class="screen-view dashboard-view active-view">
+        <div class="hero-center">
         <div class="status-shield idle" id="hero-shield">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           <div class="shield-ring outer-ring"></div>
@@ -45,20 +41,137 @@
         </div>
         
         <div class="action-row">
-          <button id="main-action-button" class="btn-primary no-drag" type="button" data-i18n="btn_connect">Connect</button>
+          <button id="main-action-button" class="btn-primary no-drag" type="button" data-i18n="btn_connect">Connect & Start</button>
           <button id="restart-button" class="icon-button btn-secondary hidden no-drag" type="button" aria-label="Restart">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
           </button>
         </div>
-      </div>
+        </div>
+
+        <aside class="log-dock no-drag" id="log-dock">
+          <label class="toggle-row compact-toggle">
+            <span data-i18n="lbl_realtime_logs">Real-time log</span>
+            <input id="log-toggle" type="checkbox">
+            <span class="switch-track" aria-hidden="true"></span>
+          </label>
+          <div class="log-panel hidden" id="log-panel">
+            <div class="log-panel-head">
+              <span data-i18n="lbl_live_events">Live events</span>
+              <button id="clear-logs-button" class="mini-button" type="button" data-i18n="btn_clear_logs">Clear</button>
+            </div>
+            <pre id="log-output" class="log-output"></pre>
+          </div>
+        </aside>
+      </section>
+
+      <section id="settings-view" class="screen-view settings-view">
+        <div class="settings-header no-drag">
+          <button id="back-button" class="icon-button" type="button" aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div>
+            <p class="section-kicker" data-i18n="settings_kicker">Control room</p>
+            <h2 data-i18n="settings_title">Settings</h2>
+          </div>
+        </div>
+
+        <div class="settings-grid no-drag">
+          <article class="settings-card">
+            <div>
+              <p class="section-kicker" data-i18n="settings_appearance">Appearance</p>
+              <h3 data-i18n="settings_theme">Theme</h3>
+            </div>
+            <div class="segmented-control" aria-label="Theme">
+              <button class="active" type="button" data-theme-choice="dark" data-i18n="theme_dark">Dark</button>
+              <button type="button" data-theme-choice="light" data-i18n="theme_light">Light</button>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <div>
+              <p class="section-kicker" data-i18n="settings_language">Language</p>
+              <h3 data-i18n="settings_language_title">Interface language</h3>
+            </div>
+            <select id="lang-select" class="lang-select" aria-label="Language">
+              <option value="en-US">English</option>
+              <option value="pt-BR">Português</option>
+              <option value="es-ES">Español</option>
+            </select>
+          </article>
+
+          <article class="settings-card proxy-card">
+            <div>
+              <p class="section-kicker" data-i18n="settings_network">Network</p>
+              <h3 data-i18n="settings_proxy">Proxy source</h3>
+              <p class="settings-note" id="proxy-summary" data-i18n="proxy_env_summary">Using .env proxy settings</p>
+            </div>
+            <div class="proxy-actions">
+              <label class="toggle-row">
+                <span data-i18n="lbl_custom_proxy">Custom proxy</span>
+                <input id="custom-proxy-toggle" type="checkbox">
+                <span class="switch-track" aria-hidden="true"></span>
+              </label>
+              <button id="edit-proxy-button" class="mini-button" type="button" data-i18n="btn_edit_proxy">Edit</button>
+            </div>
+          </article>
+        </div>
+      </section>
     </main>
     
     <footer class="app-footer no-drag">
-      <button id="support-button" class="btn-ghost" type="button" aria-label="Support the project" title="Apoiar o projeto">
+      <button id="support-button" class="btn-ghost" type="button" aria-label="Support the project" title="Support the project">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-        <span data-i18n="btn_support">Apoiar o projeto</span>
+        <span data-i18n="btn_support">Support the project</span>
       </button>
     </footer>
+
+    <div id="proxy-modal" class="modal-overlay hidden no-drag" role="dialog" aria-modal="true" aria-labelledby="proxy-modal-title">
+      <form class="modal-card" id="proxy-form">
+        <div class="modal-head">
+          <div>
+            <p class="section-kicker" data-i18n="modal_proxy_kicker">Upstream route</p>
+            <h2 id="proxy-modal-title" data-i18n="modal_proxy_title">Custom proxy</h2>
+          </div>
+          <button id="close-proxy-modal" class="icon-button" type="button" aria-label="Close modal">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m7 7 10 10M17 7 7 17"/></svg>
+          </button>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            <span data-i18n="field_proxy_type">Type</span>
+            <select id="proxy-type">
+              <option value="SOCKS5">SOCKS5</option>
+              <option value="HTTP">HTTP</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="field_proxy_host">Host</span>
+            <input id="proxy-host" type="text" autocomplete="off">
+          </label>
+          <label>
+            <span data-i18n="field_proxy_port">Port</span>
+            <input id="proxy-port" type="number" min="1" max="65535" inputmode="numeric">
+          </label>
+          <label>
+            <span data-i18n="field_proxy_user">Username</span>
+            <input id="proxy-user" type="text" autocomplete="off">
+          </label>
+          <label class="span-2">
+            <span data-i18n="field_proxy_password">Password</span>
+            <input id="proxy-pass" type="password" autocomplete="off">
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button id="reset-proxy-button" class="btn-danger-ghost" type="button" data-i18n="btn_reset_proxy">Reset to .env</button>
+          <div>
+            <button id="cancel-proxy-button" class="btn-ghost bordered" type="button" data-i18n="btn_cancel">Cancel</button>
+            <button class="btn-primary compact-primary" type="submit" data-i18n="btn_save_proxy">Save proxy</button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
   <script type="module" src="js/app.js?v=2"></script>
 </body>

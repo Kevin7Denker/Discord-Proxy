@@ -5,8 +5,10 @@
   --fg-color: #f8f8f2;
   --fg-muted: #6272a4;
   --accent: #bd93f9;
+  --accent-2: #8be9fd;
   --accent-hover: #ff79c6;
   --success: #50fa7b;
+  --warning: #f1fa8c;
   --danger: #ff5555;
   --border: rgba(255, 255, 255, 0.08);
   --shadow: rgba(0, 0, 0, 0.4);
@@ -22,8 +24,10 @@ html[data-theme="light"] {
   --fg-color: #282a36;
   --fg-muted: #6272a4;
   --accent: #bd93f9;
+  --accent-2: #0078d4;
   --accent-hover: #ff79c6;
   --success: #50fa7b;
+  --warning: #8a6d00;
   --danger: #ff5555;
   --border: rgba(0, 0, 0, 0.08);
   --shadow: rgba(0, 0, 0, 0.1);

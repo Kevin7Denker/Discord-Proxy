@@ -1,11 +1,12 @@
 import json
 import os
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Dict, Tuple
 
 from dotenv import load_dotenv
 from core.paths import get_env_path, get_base_path
 from core.network_service import ProxyEndpoint
+
 
 DEFAULT_PORTS: Dict[str, int] = {"SOCKS5": 1080, "HTTP": 8080}
 
@@ -52,6 +53,8 @@ class AppConfig:
     discord_path: str = ""
     language: str = "en-US"
     theme: str = "dark"
+    custom_proxy_enabled: bool = False
+    custom_proxy: Dict[str, object] = field(default_factory=dict)
 
     def to_proxy_endpoint(self) -> ProxyEndpoint:
         return ProxyEndpoint(
@@ -79,7 +82,7 @@ class ConfigManager:
                 pass
 
         defaults = asdict(AppConfig())
-        allowed_ui_prefs = {"language", "theme"}
+        allowed_ui_prefs = {"language", "theme", "custom_proxy_enabled", "custom_proxy"}
         merged = {**defaults, **{k: v for k, v in raw_prefs.items() if k in allowed_ui_prefs}}
 
         env_values = {
@@ -95,6 +98,13 @@ class ConfigManager:
             if v:
                 merged[k] = v
 
+        custom_proxy = raw_prefs.get("custom_proxy") if isinstance(raw_prefs.get("custom_proxy"), dict) else {}
+        merged["custom_proxy"] = self._sanitize_proxy_settings(custom_proxy) if custom_proxy else {}
+        merged["custom_proxy_enabled"] = bool(raw_prefs.get("custom_proxy_enabled")) and bool(merged["custom_proxy"])
+        if merged["custom_proxy_enabled"]:
+            for key, value in merged["custom_proxy"].items():
+                merged[key] = value
+
         merged["proxy_type"] = str(merged.get("proxy_type", "SOCKS5")).upper()
         if merged["proxy_type"] not in DEFAULT_PORTS:
             merged["proxy_type"] = "SOCKS5"
@@ -109,8 +119,11 @@ class ConfigManager:
     def save_ui_prefs(self) -> None:
         prefs = {
             "language": self.config.language,
-            "theme": self.config.theme
+            "theme": self.config.theme,
+            "custom_proxy_enabled": self.config.custom_proxy_enabled
         }
+        if self.config.custom_proxy:
+            prefs["custom_proxy"] = self.config.custom_proxy
         try:
             with open(self.prefs_path, "w", encoding="utf-8") as file:
                 json.dump(prefs, file, indent=2)
@@ -121,3 +134,60 @@ class ConfigManager:
         if hasattr(self.config, key):
             setattr(self.config, key, value)
             self.save_ui_prefs()
+
+    def set_custom_proxy(self, settings: Dict[str, object]) -> None:
+        custom_proxy = self._sanitize_proxy_settings(settings)
+        self.config.custom_proxy = custom_proxy
+        self.config.custom_proxy_enabled = True
+        for key, value in custom_proxy.items():
+            setattr(self.config, key, value)
+        self.save_ui_prefs()
+
+    def set_custom_proxy_enabled(self, enabled: bool) -> None:
+        self.config.custom_proxy_enabled = bool(enabled and self.config.custom_proxy)
+        if not self.config.custom_proxy_enabled:
+            self._apply_env_proxy()
+        self.save_ui_prefs()
+
+    def reset_custom_proxy(self) -> None:
+        self.config.custom_proxy = {}
+        self.config.custom_proxy_enabled = False
+        self._apply_env_proxy()
+        self.save_ui_prefs()
+
+    def get_proxy_preferences(self) -> Dict[str, object]:
+        return {
+            "custom_proxy_enabled": self.config.custom_proxy_enabled,
+            "custom_proxy": self.config.custom_proxy,
+            "active_proxy": {
+                "host": self.config.host,
+                "port": self.config.port,
+                "proxy_type": self.config.proxy_type,
+                "username": self.config.username,
+                "password": self.config.password
+            }
+        }
+
+    def _apply_env_proxy(self) -> None:
+        proxy_type = os.environ.get("PROXY_TYPE", "SOCKS5").upper()
+        if proxy_type not in DEFAULT_PORTS:
+            proxy_type = "SOCKS5"
+        host, port = sanitize_host_port(os.environ.get("PROXY_HOST", ""), os.environ.get("PROXY_PORT", ""), proxy_type)
+        self.config.host = host
+        self.config.port = port
+        self.config.proxy_type = proxy_type
+        self.config.username = os.environ.get("PROXY_USER", "")
+        self.config.password = os.environ.get("PROXY_PASS", "")
+
+    def _sanitize_proxy_settings(self, settings: Dict[str, object]) -> Dict[str, object]:
+        proxy_type = str(settings.get("proxy_type") or "SOCKS5").upper()
+        if proxy_type not in DEFAULT_PORTS:
+            proxy_type = "SOCKS5"
+        host, port = sanitize_host_port(str(settings.get("host", "")), str(settings.get("port", "")), proxy_type)
+        return {
+            "host": host,
+            "port": port,
+            "proxy_type": proxy_type,
+            "username": str(settings.get("username", "")),
+            "password": str(settings.get("password", ""))
+        }
