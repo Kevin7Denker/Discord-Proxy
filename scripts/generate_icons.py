@@ -131,6 +131,58 @@ def make_icon(size: int, *, active: bool = False, app_icon: bool = True) -> Imag
     return image
 
 
+def make_tray_icon(size: int, *, active: bool) -> Image.Image:
+    image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    scale = size / 64
+    status = GREEN if active else MUTED
+    glow = GREEN if active else RED
+
+    draw.rounded_rectangle(
+        (int(5 * scale), int(5 * scale), int(59 * scale), int(59 * scale)),
+        radius=int(14 * scale),
+        fill=BG,
+        outline=(255, 255, 255, 46),
+        width=max(1, int(2 * scale)),
+    )
+    draw.arc(
+        (int(10 * scale), int(10 * scale), int(54 * scale), int(54 * scale)),
+        218,
+        38,
+        fill=PURPLE,
+        width=max(2, int(5 * scale)),
+    )
+    draw.arc(
+        (int(10 * scale), int(10 * scale), int(54 * scale), int(54 * scale)),
+        38,
+        210,
+        fill=CYAN,
+        width=max(2, int(4 * scale)),
+    )
+
+    shield = [
+        (32 * scale, 15 * scale),
+        (46 * scale, 21 * scale),
+        (46 * scale, 34 * scale),
+        (42 * scale, 43 * scale),
+        (32 * scale, 51 * scale),
+        (22 * scale, 43 * scale),
+        (18 * scale, 34 * scale),
+        (18 * scale, 21 * scale),
+    ]
+    draw.line(shield + [shield[0]], fill=WHITE, width=max(2, int(5 * scale)), joint="curve")
+    draw.line(shield + [shield[0]], fill=status, width=max(1, int(3 * scale)), joint="curve")
+    draw.line((32 * scale, 25 * scale, 32 * scale, 42 * scale), fill=CYAN, width=max(1, int(3 * scale)))
+
+    draw.ellipse(
+        (int(42 * scale), int(42 * scale), int(58 * scale), int(58 * scale)),
+        fill=glow,
+        outline=BG,
+        width=max(1, int(3 * scale)),
+    )
+    return image
+
+
 def main() -> None:
     ASSETS_DIR.mkdir(exist_ok=True)
     sizes = [16, 24, 32, 48, 64, 128, 256]
@@ -141,8 +193,8 @@ def main() -> None:
         append_images=icon_images[:-1],
     )
     make_icon(256, app_icon=True).save(ASSETS_DIR / "icon.png")
-    make_icon(64, active=False, app_icon=False).save(ASSETS_DIR / "tray-idle.png")
-    make_icon(64, active=True, app_icon=False).save(ASSETS_DIR / "tray-active.png")
+    make_tray_icon(64, active=False).save(ASSETS_DIR / "tray-idle.png")
+    make_tray_icon(64, active=True).save(ASSETS_DIR / "tray-active.png")
 
 
 if __name__ == "__main__":

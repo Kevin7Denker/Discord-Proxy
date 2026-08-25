@@ -1,6 +1,7 @@
 import asyncio
 import signal
 import sys
+import ctypes
 
 from core.config import ConfigManager
 from core.i18n import I18n
@@ -23,4 +24,5 @@ def main() -> None:
 if __name__ == "__main__":
     if sys.platform.startswith("win"):
         asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("KevinDenker.DiscordProxie")
     main()
