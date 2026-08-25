@@ -37,10 +37,13 @@ Use **Test connection** para confirmar IP, pais e latencia antes de iniciar o Di
 Instale as dependencias e execute:
 
 ```powershell
-python build.py
+.venv-build\Scripts\python.exe scripts\build.py
+.venv-build\Scripts\python.exe scripts\build_setup.py
 ```
 
-O arquivo `dist/DISCORD PROXY.exe` sera gerado em modo standalone, sem console. Mantenha `assets/icon.ico` no repositorio para usar o icone personalizado.
+O arquivo `dist\DiscordProxie-Setup.exe` sera gerado com o aplicativo empacotado. O build usa o `.env` local quando ele existe, para que o instalador leve a rota de proxy configurada sem commitar credenciais. Se `.env` nao existir, o build usa `.env.example` apenas como fallback.
+
+Mantenha `assets/icon.ico` no repositorio para usar o icone personalizado.
 
 ## Estrutura
 
