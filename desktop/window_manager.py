@@ -19,7 +19,7 @@ class WindowManager:
         self.config_manager = config_manager
         self.logger = logger
         self.i18n = i18n
-        self.launcher = DiscordLauncher(logger)
+        self.launcher = DiscordLauncher()
         self.window = None
         self.current_city = None
         self.current_country = None
