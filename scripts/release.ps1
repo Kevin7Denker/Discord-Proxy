@@ -1,8 +1,8 @@
 Param(
     [string]$Configuration = "Production",
     [string]$InnoSetupCompiler = $env:INNOSETUP_COMPILER,
-    [string]$AppExe = "dist\DiscordProxy.exe",
-    [string]$SetupExe = "dist\DiscordProxy-Setup.exe"
+    [string]$AppExe = "dist\DiscordProxie\DiscordProxie.exe",
+    [string]$SetupExe = "dist\DiscordProxie-Setup.exe"
 )
 
 $ErrorActionPreference = "Stop"
@@ -49,7 +49,7 @@ if (Test-Path -LiteralPath $SetupExe) {
 }
 
 Write-Host "Building application..."
-python build.py
+python scripts\build.py
 if ($LASTEXITCODE -ne 0) {
     throw "Application build failed with exit code $LASTEXITCODE."
 }
@@ -66,7 +66,7 @@ if ($Configuration -eq "Development") {
 
 $iscc = Find-InnoSetupCompiler -ConfiguredPath $InnoSetupCompiler
 Write-Host "Building installer..."
-& $iscc "installer\installer.iss"
+& $iscc "scripts\installer.iss"
 if ($LASTEXITCODE -ne 0) {
     throw "Inno Setup failed with exit code $LASTEXITCODE."
 }

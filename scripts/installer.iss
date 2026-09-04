@@ -1,5 +1,5 @@
 #define MyAppName "Discord Proxie"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.2"
 #define MyAppPublisher "Kevin Denker"
 #define MyAppExeName "DiscordProxie.exe"
 

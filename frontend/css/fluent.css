@@ -63,6 +63,18 @@ body {
   font-size: 11px;
 }
 
+.brand-version {
+  color: var(--accent-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border: 1px solid rgba(139, 233, 253, 0.28);
+  border-radius: 999px;
+  background: rgba(139, 233, 253, 0.08);
+}
+
 .window-actions {
   display: flex;
   align-items: center;

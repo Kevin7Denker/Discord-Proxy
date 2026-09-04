@@ -7,6 +7,7 @@ import zipfile
 
 
 APP_NAME = "Discord Proxie"
+APP_VERSION = "1.2"
 EXE_NAME = "DiscordProxie.exe"
 SETUP_NAME = "DiscordProxie-Setup.exe"
 
@@ -30,12 +31,23 @@ def write_install_script(path: Path) -> None:
             $installRoot = Join-Path $env:LOCALAPPDATA "Programs\\{APP_NAME}"
             $payload = Join-Path $PSScriptRoot "payload.zip"
             $exePath = Join-Path $installRoot "{EXE_NAME}"
+            $pythonDllPath = Join-Path $installRoot "_internal\\python312.dll"
+            $pythonRuntimePath = Join-Path $installRoot "_internal\\pythonnet\\runtime\\Python.Runtime.dll"
+
+            Get-Process -Name "DiscordProxie" -ErrorAction SilentlyContinue | ForEach-Object {{
+              Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
+              Wait-Process -Id $_.Id -Timeout 10 -ErrorAction SilentlyContinue
+            }}
 
             if (Test-Path $installRoot) {{
               Remove-Item -LiteralPath $installRoot -Recurse -Force
             }}
             New-Item -ItemType Directory -Path $installRoot -Force | Out-Null
             Expand-Archive -LiteralPath $payload -DestinationPath $installRoot -Force
+
+            if (-not (Test-Path $exePath) -or -not (Test-Path $pythonDllPath) -or -not (Test-Path $pythonRuntimePath)) {{
+              throw "Install validation failed: DiscordProxie.exe, _internal\\python312.dll, or _internal\\pythonnet\\runtime\\Python.Runtime.dll was not extracted."
+            }}
 
             $shell = New-Object -ComObject WScript.Shell
             $desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "{APP_NAME}.lnk"
@@ -51,7 +63,7 @@ def write_install_script(path: Path) -> None:
             $shortcut.WorkingDirectory = $installRoot
             $shortcut.Save()
 
-            Start-Process -FilePath $exePath
+            Start-Process -FilePath $exePath -WorkingDirectory $installRoot
             """
         ).strip()
         + "\n",
@@ -80,7 +92,7 @@ def write_sed(path: Path, source_dir: Path, output_exe: Path) -> None:
             DisplayLicense=
             FinishMessage=
             TargetName={output_exe}
-            FriendlyName={APP_NAME}
+            FriendlyName={APP_NAME} {APP_VERSION}
             AppLaunched=powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -NoProfile -File install.ps1
             PostInstallCmd=<None>
             AdminQuietInstCmd=

@@ -4,6 +4,14 @@ from pathlib import Path
 
 import sys
 
+
+REQUIRED_RUNTIME_FILES = [
+    Path("DiscordProxie.exe"),
+    Path("_internal") / "python312.dll",
+    Path("_internal") / "pythonnet" / "runtime" / "Python.Runtime.dll",
+    Path("_internal") / "frontend" / "index.html",
+]
+
 def prepare_release_env(root: Path, announce: bool = False) -> Path | None:
     env_source = root / ".env"
     fallback_source = root / ".env.example"
@@ -49,7 +57,14 @@ def build() -> None:
         command.insert(-1, "--add-data=tun2socks.exe;.")
     
     subprocess.run(command, check=True)
+    validate_onedir_app(root / "dist" / "DiscordProxie")
     print("Build complete!")
+
+
+def validate_onedir_app(app_dir: Path) -> None:
+    missing = [str(path) for path in REQUIRED_RUNTIME_FILES if not (app_dir / path).is_file()]
+    if missing:
+        raise FileNotFoundError(f"Build output is missing required files: {', '.join(missing)}")
 
 if __name__ == "__main__":
     build()
