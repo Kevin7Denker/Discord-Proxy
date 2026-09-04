@@ -10,6 +10,8 @@ import webview
 from core.config import ConfigManager
 from core.discord_launcher import DiscordLauncher
 from core.i18n import I18n
+from core.observability import ConnectionObserver
+from core.paths import get_user_log_path
 from core.paths import get_frontend_path
 from desktop.api_bridge import ApiBridge
 from desktop.tray_manager import TrayManager
@@ -19,7 +21,8 @@ class WindowManager:
         self.config_manager = config_manager
         self.logger = logger
         self.i18n = i18n
-        self.launcher = DiscordLauncher()
+        self.connection_observer = ConnectionObserver(logger, sink_path=get_user_log_path())
+        self.launcher = DiscordLauncher(logger=logger, observer=self.connection_observer)
         self.window = None
         self.current_city = None
         self.current_country = None

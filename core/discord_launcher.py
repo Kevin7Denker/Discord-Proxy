@@ -6,9 +6,12 @@ import subprocess
 from typing import List, Optional
 from contextlib import suppress
 
+from .connection_classifier import ConnectionCategory
 from .config import AppConfig
 from .network_service import TunManager
 from .local_relay import LocalRelayService, RelayConfig
+from .observability import ConnectionEvent, ConnectionObserver, next_connection_id
+from .paths import get_user_log_path
 from .processes import hidden_subprocess_kwargs
 import threading
 import sys
@@ -28,11 +31,12 @@ class LaunchResult:
 
 
 class DiscordLauncher:
-    def __init__(self) -> None:
-        self.logger = get_logger()
+    def __init__(self, logger=None, observer: Optional[ConnectionObserver] = None) -> None:
+        self.logger = logger or get_logger()
+        self.observer = observer or ConnectionObserver(self.logger, sink_path=get_user_log_path())
         self.process: Optional[subprocess.Popen] = None
         self.relay: Optional[LocalRelayService] = None
-        self.tun_manager = TunManager(self.logger)
+        self.tun_manager = TunManager(self.logger, self.observer)
         self.monitor_thread: Optional[threading.Thread] = None
 
     def start(self, config: AppConfig) -> LaunchResult:
@@ -43,7 +47,7 @@ class DiscordLauncher:
         host, port, relay_active = config.host, config.port, False
         if config.username or config.password:
             self.logger.info("Authentication detected. Starting local relay on 127.0.0.1:9050.")
-            self.relay = LocalRelayService(config.to_proxy_endpoint(), RelayConfig(scheme))
+            self.relay = LocalRelayService(config.to_proxy_endpoint(), RelayConfig(scheme), observer=self.observer)
             self.relay.start()
             host, port, relay_active = "127.0.0.1", 9050, True
         if scheme == "socks5":
@@ -53,6 +57,7 @@ class DiscordLauncher:
             self.logger.info("DNS resolution forced through proxy tunnel.")
         else:
             self.logger.info("Applying media-compatible RTC policy for voice and streams.")
+        self._observe_launch_policy(scheme, host, port, config.rtc_mode, relay_active)
         self.logger.info("Starting Discord with proxy configuration.")
         self.process = subprocess.Popen(self._build_launch_args(config.discord_path, scheme, host, port, config.rtc_mode))
         # Start monitor thread to watch process exit
@@ -90,6 +95,22 @@ class DiscordLauncher:
         else:
             args.append("--force-webrtc-ip-handling-policy=default_public_interface_only")
         return args
+
+    def _observe_launch_policy(self, proxy_scheme: str, proxy_host: str, proxy_port: int, rtc_mode: str, relay_active: bool) -> None:
+        transport = "SOCKS_TCP" if proxy_scheme == "socks5" else "HTTP_CONNECT"
+        self.observer.emit(
+            ConnectionEvent(
+                connection_id=next_connection_id(),
+                process="Discord",
+                destination_hostname=proxy_host,
+                destination_port=proxy_port,
+                protocol="TCP",
+                transport=transport,
+                category=ConnectionCategory.CONTROL,
+                result="launch_policy",
+                metadata={"rtc_mode": rtc_mode, "relay_active": relay_active},
+            )
+        )
 
     def stop_existing_discord_instances(self) -> None:
         for process_name in DISCORD_PROCESS_NAMES:

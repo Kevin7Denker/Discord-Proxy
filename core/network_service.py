@@ -9,6 +9,8 @@ from typing import Any, Dict, Optional
 from urllib.parse import quote
 
 import httpx
+from core.connection_classifier import ConnectionCategory
+from core.observability import ConnectionEvent, ConnectionObserver, LogLevel, next_connection_id
 from core.paths import get_base_path
 from core.processes import hidden_subprocess_kwargs
 
@@ -55,8 +57,9 @@ class TunManager:
     _BINARY_NAME = "tun2socks.exe"
     _CREATE_NO_WINDOW = 0x08000000
 
-    def __init__(self, logger):
+    def __init__(self, logger, observer: Optional[ConnectionObserver] = None):
         self.logger = logger
+        self.observer = observer
         self._process: Optional[subprocess.Popen] = None
 
     @property
@@ -76,15 +79,34 @@ class TunManager:
         binary = self.find_binary()
         if not binary:
             self.logger.warning("tun2socks.exe not found. UDP tunneling unavailable.")
+            self._observe("TUNNEL_UDP", "unavailable", "tun2socks.exe not found")
             return False
         try:
             self._process = subprocess.Popen([binary, "-device", "tun://tun-discord", "-proxy", build_proxy_url(endpoint)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **hidden_subprocess_kwargs())
             self.logger.info("tun2socks active. UDP traffic tunneled through SOCKS5.")
+            self._observe("TUNNEL_UDP", "started")
             return True
         except Exception as exc:
             self.logger.error(f"Failed to start tun2socks: {exc}")
+            self._observe("TUNNEL_UDP", "error", str(exc), LogLevel.ERROR)
             self._process = None
             return False
+
+    def _observe(self, transport: str, result: str, error: Optional[str] = None, level: LogLevel = LogLevel.INFO) -> None:
+        if not self.observer:
+            return
+        self.observer.emit(
+            ConnectionEvent(
+                connection_id=next_connection_id(),
+                process="tun2socks",
+                protocol="UDP",
+                transport=transport,
+                category=ConnectionCategory.MEDIA,
+                result=result,
+                error=error,
+            ),
+            level=level,
+        )
 
     def stop(self) -> None:
         if self._process is None:

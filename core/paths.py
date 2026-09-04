@@ -16,3 +16,9 @@ def get_env_path() -> Path:
 
 def get_locales_path() -> Path:
     return get_frontend_path() / "locales"
+
+def get_user_log_path() -> Path:
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    if local_app_data:
+        return Path(local_app_data) / "Discord Proxie" / "logs" / "connections.jsonl"
+    return get_base_path() / "logs" / "connections.jsonl"
