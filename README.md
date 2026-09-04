@@ -29,6 +29,8 @@ python main.py
 - **Type:** `SOCKS5` ou `HTTP`.
 - **Username / Password:** credenciais do proxy, quando exigidas.
 - **Discord executable:** caminho do `Discord.exe`; o app tenta detectar esse caminho automaticamente.
+- **RTC mode:** `media` por padrao para permitir voz e transmissao; use `strict` em `DISCORD_RTC_MODE` somente quando quiser bloquear UDP/WebRTC fora do proxy.
+- **Iniciar com Windows:** pode ser ativado em Configuracoes e grava uma entrada no `Run` do usuario atual, sem exigir administrador.
 
 Use **Test connection** para confirmar IP, pais e latencia antes de iniciar o Discord.
 

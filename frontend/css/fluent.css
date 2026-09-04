@@ -529,18 +529,20 @@ button {
   margin-top: 8px;
 }
 
-.proxy-card {
-  grid-column: 1 / -1;
+.proxy-card,
+.startup-card {
   min-height: 142px;
-  flex-direction: row;
-  align-items: center;
+}
+
+.startup-card .toggle-row {
+  align-self: flex-start;
 }
 
 .proxy-actions {
-  min-width: 210px;
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 12px;
 }
 

@@ -4,6 +4,7 @@ import time
 from dataclasses import asdict
 
 from core.network_service import test_proxy_connectivity
+from core.startup import set_start_with_windows
 
 class ApiBridge:
     def __init__(self, manager):
@@ -54,6 +55,19 @@ class ApiBridge:
         if theme in {"light", "dark"}:
             self._manager.config_manager.update_pref("theme", theme)
 
+    def set_start_with_windows(self, enabled: bool) -> dict:
+        requested = bool(enabled)
+        applied = set_start_with_windows(requested)
+        if not applied and requested:
+            self._manager.logger.error("Start with Windows is only available on Windows.")
+            return {"ok": False, "message": "Start with Windows is only available on Windows."}
+
+        self._manager.config_manager.update_pref("start_with_windows", requested)
+        mode = "enabled" if requested else "disabled"
+        self._manager.logger.info(f"Start with Windows {mode}.")
+        self._manager.push_state()
+        return {"ok": True, "start_with_windows": requested}
+
     def set_custom_proxy(self, settings: dict) -> dict:
         self._manager.config_manager.set_custom_proxy(settings)
         self._manager.logger.info("Custom proxy settings saved.")
@@ -88,6 +102,7 @@ class ApiBridge:
             "active": self._manager.launcher.is_active(),
             "lang": self._manager.i18n.current_lang,
             "theme": self._manager.config_manager.config.theme,
+            "start_with_windows": self._manager.config_manager.config.start_with_windows,
             "proxy_preferences": self._manager.config_manager.get_proxy_preferences(),
             "logs": list(self._manager.log_buffer)
         }

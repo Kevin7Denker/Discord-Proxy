@@ -10,6 +10,7 @@ from urllib.parse import quote
 
 import httpx
 from core.paths import get_base_path
+from core.processes import hidden_subprocess_kwargs
 
 
 @dataclass
@@ -77,7 +78,7 @@ class TunManager:
             self.logger.warning("tun2socks.exe not found. UDP tunneling unavailable.")
             return False
         try:
-            self._process = subprocess.Popen([binary, "-device", "tun://tun-discord", "-proxy", build_proxy_url(endpoint)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=self._CREATE_NO_WINDOW)
+            self._process = subprocess.Popen([binary, "-device", "tun://tun-discord", "-proxy", build_proxy_url(endpoint)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **hidden_subprocess_kwargs())
             self.logger.info("tun2socks active. UDP traffic tunneled through SOCKS5.")
             return True
         except Exception as exc:

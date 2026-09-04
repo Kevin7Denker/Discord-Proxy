@@ -23,21 +23,6 @@ def load_dotenv_stub(path, override=False):
 dotenv_stub.load_dotenv = load_dotenv_stub
 sys.modules.setdefault("dotenv", dotenv_stub)
 
-network_service_stub = types.ModuleType("core.network_service")
-
-
-class ProxyEndpoint:
-    def __init__(self, host, port, proxy_type, username, password):
-        self.host = host
-        self.port = port
-        self.proxy_type = proxy_type
-        self.username = username
-        self.password = password
-
-
-network_service_stub.ProxyEndpoint = ProxyEndpoint
-sys.modules.setdefault("core.network_service", network_service_stub)
-
 from core.config import ConfigManager
 
 
@@ -134,6 +119,19 @@ class ConfigManagerProxyPreferenceTests(unittest.TestCase):
         self.assertEqual(saved_prefs["theme"], "light")
         self.assertFalse(saved_prefs["custom_proxy_enabled"])
         self.assertNotIn("custom_proxy", saved_prefs)
+
+    def test_start_with_windows_preference_is_persisted(self):
+        manager, base_path = self.build_manager(
+            "PROXY_HOST=env.proxy.local\nPROXY_PORT=1081\nPROXY_TYPE=SOCKS5\n",
+            {"start_with_windows": True},
+        )
+
+        self.assertTrue(manager.config.start_with_windows)
+
+        manager.update_pref("start_with_windows", False)
+
+        saved_prefs = json.loads((base_path / "prefs.json").read_text(encoding="utf-8"))
+        self.assertFalse(saved_prefs["start_with_windows"])
 
 
 if __name__ == "__main__":

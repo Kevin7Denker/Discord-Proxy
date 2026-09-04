@@ -81,7 +81,7 @@ def write_sed(path: Path, source_dir: Path, output_exe: Path) -> None:
             FinishMessage=
             TargetName={output_exe}
             FriendlyName={APP_NAME}
-            AppLaunched=powershell.exe -ExecutionPolicy Bypass -NoProfile -File install.ps1
+            AppLaunched=powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -NoProfile -File install.ps1
             PostInstallCmd=<None>
             AdminQuietInstCmd=
             UserQuietInstCmd=

@@ -18,6 +18,7 @@ class AppContext {
       mainActionBtn: document.getElementById('main-action-button'),
       restartBtn: document.getElementById('restart-button'),
       langSelect: document.getElementById('lang-select'),
+      startupToggle: document.getElementById('startup-toggle'),
       supportBtn: document.getElementById('support-button'),
       themeChoices: Array.from(document.querySelectorAll('[data-theme-choice]')),
       logToggle: document.getElementById('log-toggle'),
@@ -46,6 +47,7 @@ class AppContext {
       timerInterval: null,
       lang: 'en-US',
       theme: 'dark',
+      startWithWindows: false,
       translations: {},
       logs: [],
       logsEnabled: false,
@@ -117,6 +119,17 @@ class AppContext {
         this.state.logs = await Api.getRecentLogs();
       }
       this.renderLogs();
+    });
+
+    this.elements.startupToggle.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+      this.state.startWithWindows = enabled;
+      if (!window.pywebview) return;
+      const result = await Api.setStartWithWindows(enabled);
+      if (result && result.ok === false) {
+        this.state.startWithWindows = false;
+      }
+      this.syncStartupControl();
     });
 
     this.elements.clearLogsBtn.addEventListener('click', () => {
@@ -219,6 +232,9 @@ class AppContext {
       this.state.logs = stateObj.logs;
     }
     this.stateManager.updateState(stateObj);
+    if (Object.prototype.hasOwnProperty.call(stateObj, 'start_with_windows')) {
+      this.state.startWithWindows = Boolean(stateObj.start_with_windows);
+    }
     this.syncSettingsControls();
     this.renderLogs();
   }
@@ -235,6 +251,7 @@ class AppContext {
   syncSettingsControls() {
     if (this.elements.langSelect) this.elements.langSelect.value = this.state.lang;
     this.syncThemeButtons();
+    this.syncStartupControl();
     this.syncProxyControls();
   }
 
@@ -242,6 +259,12 @@ class AppContext {
     this.elements.themeChoices.forEach((button) => {
       button.classList.toggle('active', button.dataset.themeChoice === this.state.theme);
     });
+  }
+
+  syncStartupControl() {
+    if (this.elements.startupToggle) {
+      this.elements.startupToggle.checked = Boolean(this.state.startWithWindows);
+    }
   }
 
   syncProxyControls() {

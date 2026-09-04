@@ -51,8 +51,10 @@ class AppConfig:
     username: str = ""
     password: str = ""
     discord_path: str = ""
+    rtc_mode: str = "media"
     language: str = "en-US"
     theme: str = "dark"
+    start_with_windows: bool = False
     custom_proxy_enabled: bool = False
     custom_proxy: Dict[str, object] = field(default_factory=dict)
 
@@ -82,7 +84,7 @@ class ConfigManager:
                 pass
 
         defaults = asdict(AppConfig())
-        allowed_ui_prefs = {"language", "theme", "custom_proxy_enabled", "custom_proxy"}
+        allowed_ui_prefs = {"language", "theme", "start_with_windows", "custom_proxy_enabled", "custom_proxy"}
         merged = {**defaults, **{k: v for k, v in raw_prefs.items() if k in allowed_ui_prefs}}
 
         env_values = {
@@ -92,6 +94,7 @@ class ConfigManager:
             "username": os.environ.get("PROXY_USER", ""),
             "password": os.environ.get("PROXY_PASS", ""),
             "discord_path": os.environ.get("DISCORD_PATH", ""),
+            "rtc_mode": os.environ.get("DISCORD_RTC_MODE", ""),
         }
         
         for k, v in env_values.items():
@@ -110,6 +113,9 @@ class ConfigManager:
             merged["proxy_type"] = "SOCKS5"
             
         merged["host"], merged["port"] = sanitize_host_port(merged.get("host", ""), str(merged.get("port", "")), merged["proxy_type"])
+        merged["rtc_mode"] = str(merged.get("rtc_mode", "media")).lower()
+        if merged["rtc_mode"] not in {"media", "strict"}:
+            merged["rtc_mode"] = "media"
         
         path = str(merged.get("discord_path") or "")
         merged["discord_path"] = path if os.path.isfile(path) else find_discord_executable()
@@ -120,6 +126,7 @@ class ConfigManager:
         prefs = {
             "language": self.config.language,
             "theme": self.config.theme,
+            "start_with_windows": self.config.start_with_windows,
             "custom_proxy_enabled": self.config.custom_proxy_enabled
         }
         if self.config.custom_proxy:

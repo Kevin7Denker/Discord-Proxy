@@ -27,6 +27,10 @@ export class Api {
     return await window.pywebview.api.set_language(lang);
   }
 
+  static async setStartWithWindows(enabled) {
+    return await window.pywebview.api.set_start_with_windows(enabled);
+  }
+
   static async getTranslations() {
     return await window.pywebview.api.get_translations();
   }
