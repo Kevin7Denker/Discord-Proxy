@@ -21,6 +21,26 @@ class BuildValidationTests(unittest.TestCase):
 
             self.assertIn("Python.Runtime.dll", str(error.exception))
 
+    def test_validate_onedir_app_requires_tun2socks_and_wintun(self):
+        self.assertIn(Path("_internal") / "tun2socks.exe", REQUIRED_RUNTIME_FILES)
+        self.assertIn(Path("_internal") / "wintun.dll", REQUIRED_RUNTIME_FILES)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            app_dir = Path(temp_dir)
+            for relative_path in REQUIRED_RUNTIME_FILES:
+                target = app_dir / relative_path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("", encoding="utf-8")
+
+            (app_dir / "_internal" / "tun2socks.exe").unlink()
+            (app_dir / "_internal" / "wintun.dll").unlink()
+
+            with self.assertRaises(FileNotFoundError) as error:
+                validate_onedir_app(app_dir)
+
+            self.assertIn("tun2socks.exe", str(error.exception))
+            self.assertIn("wintun.dll", str(error.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

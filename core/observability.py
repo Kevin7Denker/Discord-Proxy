@@ -105,6 +105,9 @@ class ConnectionEvent:
             parts.append(f"latency_ms={self.latency_ms}")
         if self.connection_duration_ms is not None:
             parts.append(f"duration_ms={self.connection_duration_ms}")
+        diagnosis = self.metadata.get("diagnosis")
+        if diagnosis:
+            parts.append(f"diagnosis={diagnosis}")
         if self.error:
             parts.append(f"error={self.error}")
         return " ".join(parts)
@@ -116,6 +119,9 @@ class ConnectionObserver:
         self.level = level
         self.sink_path = sink_path
         self._lock = threading.Lock()
+        from .screen_share_diagnostics import ScreenShareDiagnostics
+
+        self._screen_share_diagnostics = ScreenShareDiagnostics()
 
     def emit(self, event: ConnectionEvent, level: LogLevel = LogLevel.INFO) -> None:
         if level < self.level:
@@ -123,6 +129,9 @@ class ConnectionObserver:
         line = event.to_compact_log_line()
         self._log(level, line)
         self._write_jsonl(event)
+        summary = self._screen_share_diagnostics.record(event)
+        if summary:
+            self.emit(summary, LogLevel.WARN)
 
     def _log(self, level: LogLevel, line: str) -> None:
         if level >= LogLevel.ERROR and hasattr(self.logger, "error"):

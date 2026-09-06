@@ -10,6 +10,8 @@ REQUIRED_RUNTIME_FILES = [
     Path("_internal") / "python312.dll",
     Path("_internal") / "pythonnet" / "runtime" / "Python.Runtime.dll",
     Path("_internal") / "frontend" / "index.html",
+    Path("_internal") / "tun2socks.exe",
+    Path("_internal") / "wintun.dll",
 ]
 
 def prepare_release_env(root: Path, announce: bool = False) -> Path | None:
@@ -53,8 +55,9 @@ def build() -> None:
 
     if dist_env.is_file():
         command.insert(-1, f"--add-data={dist_env};.")
-    if (root / "tun2socks.exe").is_file():
-        command.insert(-1, "--add-data=tun2socks.exe;.")
+    vendor_tun2socks = root / "vendor" / "tun2socks"
+    command.insert(-1, f"--add-data={vendor_tun2socks / 'tun2socks.exe'};.")
+    command.insert(-1, f"--add-data={vendor_tun2socks / 'wintun.dll'};.")
     
     subprocess.run(command, check=True)
     validate_onedir_app(root / "dist" / "DiscordProxie")

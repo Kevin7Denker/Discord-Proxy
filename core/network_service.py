@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from urllib.parse import quote
 
 import httpx
@@ -67,22 +67,53 @@ class TunManager:
         return self._process is not None and self._process.poll() is None
 
     def find_binary(self) -> Optional[str]:
+        runtime = self.find_runtime()
+        return runtime[0] if runtime else None
+
+    def find_runtime(self) -> Optional[tuple[str, str]]:
         locations = [get_base_path() / self._BINARY_NAME, Path.cwd() / self._BINARY_NAME]
         for location in locations:
-            if location.is_file():
-                return str(location)
-        return shutil.which(self._BINARY_NAME)
+            runtime = self._validate_runtime(location)
+            if runtime:
+                return runtime
+        found = shutil.which(self._BINARY_NAME)
+        if found:
+            return self._validate_runtime(Path(found))
+        return None
+
+    def _validate_runtime(self, binary: Path) -> Optional[tuple[str, str]]:
+        if not binary.is_file():
+            return None
+        wintun = binary.with_name("wintun.dll")
+        if not wintun.is_file():
+            self.logger.warning("wintun.dll not found next to tun2socks.exe. UDP tunneling unavailable.")
+            return None
+        return str(binary), str(wintun)
+
+    def build_command(self, binary: str, endpoint: ProxyEndpoint) -> List[str]:
+        return [
+            binary,
+            "--device",
+            "wintun",
+            "--proxy",
+            build_proxy_url(endpoint),
+            "--loglevel",
+            "warn",
+            "--udp-timeout",
+            "2m",
+        ]
 
     def start(self, endpoint: ProxyEndpoint) -> bool:
         if self.is_running:
             return True
-        binary = self.find_binary()
-        if not binary:
-            self.logger.warning("tun2socks.exe not found. UDP tunneling unavailable.")
+        runtime = self.find_runtime()
+        if not runtime:
+            self.logger.warning("tun2socks.exe or wintun.dll not found. UDP tunneling unavailable.")
             self._observe("TUNNEL_UDP", "unavailable", "tun2socks.exe not found")
             return False
+        binary, _wintun = runtime
         try:
-            self._process = subprocess.Popen([binary, "-device", "tun://tun-discord", "-proxy", build_proxy_url(endpoint)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **hidden_subprocess_kwargs())
+            self._process = subprocess.Popen(self.build_command(binary, endpoint), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **hidden_subprocess_kwargs())
             self.logger.info("tun2socks active. UDP traffic tunneled through SOCKS5.")
             self._observe("TUNNEL_UDP", "started")
             return True

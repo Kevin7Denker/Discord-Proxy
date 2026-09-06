@@ -85,6 +85,53 @@ class ObservabilityTests(unittest.TestCase):
             self.assertEqual("conn:000001", saved["connection_id"])
             self.assertEqual("discord.com", saved["destination_hostname"])
 
+    def test_observer_emits_screen_share_summary_after_timeout(self):
+        logger = FakeLogger()
+        observer = ConnectionObserver(logger=logger, level=LogLevel.INFO)
+
+        observer.emit(
+            ConnectionEvent(
+                connection_id="conn:000021",
+                process="Discord",
+                destination_hostname="c-ewr13-b24de978.discord.media",
+                destination_port=2087,
+                protocol="TCP",
+                transport="RTC_CONTROL_WEBSOCKET",
+                category=ConnectionCategory.SCREEN_SHARE,
+                result="rtc_control_connected",
+                metadata={"media_context": "stream"},
+            )
+        )
+        observer.emit(
+            ConnectionEvent(
+                connection_id="conn:000025",
+                process="Discord",
+                destination_ip="104.29.156.113",
+                destination_port=19322,
+                protocol="UDP",
+                transport="DIRECT_UDP",
+                category=ConnectionCategory.SCREEN_SHARE,
+                result="rtc_media_server_connected",
+                metadata={"media_context": "stream"},
+            )
+        )
+        observer.emit(
+            ConnectionEvent(
+                connection_id="conn:000028",
+                process="Discord",
+                protocol="RTC",
+                transport="DISCORD_MEDIA_ENGINE",
+                category=ConnectionCategory.SCREEN_SHARE,
+                result="video-stream-receiver-ready-timeout",
+                error="video-stream-receiver-ready-timeout",
+                metadata={"media_context": "stream"},
+            )
+        )
+
+        messages = [message for _, message in logger.messages]
+        self.assertTrue(any("result=screen_share_diagnostic" in message for message in messages))
+        self.assertTrue(any("diagnosis=" in message for message in messages))
+
 
 if __name__ == "__main__":
     unittest.main()

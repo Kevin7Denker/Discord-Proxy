@@ -133,6 +133,11 @@ class ConfigManagerProxyPreferenceTests(unittest.TestCase):
         saved_prefs = json.loads((base_path / "prefs.json").read_text(encoding="utf-8"))
         self.assertFalse(saved_prefs["start_with_windows"])
 
+    def test_default_rtc_mode_blocks_direct_udp_for_screen_share(self):
+        manager, _ = self.build_manager("PROXY_HOST=env.proxy.local\nPROXY_PORT=1081\nPROXY_TYPE=SOCKS5\n")
+
+        self.assertEqual("strict", manager.config.rtc_mode)
+
 
 if __name__ == "__main__":
     unittest.main()

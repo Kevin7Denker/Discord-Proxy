@@ -31,7 +31,7 @@ python main.py
 - **Type:** `SOCKS5` ou `HTTP`.
 - **Username / Password:** credenciais do proxy, quando exigidas.
 - **Discord executable:** caminho do `Discord.exe`; o app tenta detectar esse caminho automaticamente.
-- **RTC mode:** `media` por padrao para permitir voz e transmissao; use `strict` em `DISCORD_RTC_MODE` somente quando quiser bloquear UDP/WebRTC fora do proxy.
+- **RTC mode:** `strict` por padrao para bloquear UDP/WebRTC direto fora do proxy e reduzir falhas de transmissao. Em proxies da Railway (`*.rlwy.net`), o app usa fallback TCP-only porque a plataforma expoe o servico via TCP Proxy. Use `DISCORD_RTC_MODE=media` apenas como modo legado quando quiser permitir UDP direto.
 - **Iniciar com Windows:** pode ser ativado em Configuracoes e grava uma entrada no `Run` do usuario atual, sem exigir administrador.
 
 Use **Test connection** para confirmar IP, pais e latencia antes de iniciar o Discord.

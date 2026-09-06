@@ -51,7 +51,7 @@ class AppConfig:
     username: str = ""
     password: str = ""
     discord_path: str = ""
-    rtc_mode: str = "media"
+    rtc_mode: str = "strict"
     language: str = "en-US"
     theme: str = "dark"
     start_with_windows: bool = False
@@ -113,9 +113,9 @@ class ConfigManager:
             merged["proxy_type"] = "SOCKS5"
             
         merged["host"], merged["port"] = sanitize_host_port(merged.get("host", ""), str(merged.get("port", "")), merged["proxy_type"])
-        merged["rtc_mode"] = str(merged.get("rtc_mode", "media")).lower()
+        merged["rtc_mode"] = str(merged.get("rtc_mode", "strict")).lower()
         if merged["rtc_mode"] not in {"media", "strict"}:
-            merged["rtc_mode"] = "media"
+            merged["rtc_mode"] = "strict"
         
         path = str(merged.get("discord_path") or "")
         merged["discord_path"] = path if os.path.isfile(path) else find_discord_executable()
